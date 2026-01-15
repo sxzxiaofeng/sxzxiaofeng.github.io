@@ -9,7 +9,9 @@ description: '即使身陷沟壑, 也要仰望星云'
 keywords: 前端 javaScript js ts React Vue
 author: Peak
 # language: en
-language: zh-CN
+language: 
+  - zh-CN
+  - en
 timezone: 'Asia/Shanghai'
 
 # URL

@@ -1,0 +1,390 @@
+<!-- 引入Google Translate API -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'zh-CN',
+      includedLanguages: 'en,zh-CN',
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<script>
+  // 自定义语言切换功能
+  (function() {
+    // 创建语言切换器
+    function createLanguageSwitcher() {
+      const languages = [
+        { code: 'zh-CN', name: '中文', flag: '🇨🇳', googleCode: 'zh-CN' },
+        { code: 'en', name: 'English', flag: '🇺🇸', googleCode: 'en' }
+      ];
+      
+      // 获取当前语言
+      const currentLang = getCookie('googtrans') ? 
+        (getCookie('googtrans').split('/')[2] || 'zh-CN') : 'zh-CN';
+      
+      // 创建语言切换器容器
+      const langSwitcher = document.createElement('div');
+      langSwitcher.className = 'custom-language-switcher';
+      langSwitcher.innerHTML = `
+        <div class="current-lang">
+          ${languages.find(lang => lang.code === currentLang).flag} ${languages.find(lang => lang.code === currentLang).name}
+          <span class="arrow">▼</span>
+        </div>
+        <div class="lang-options">
+          ${languages.map(lang => `
+            <div class="lang-option ${lang.code === currentLang ? 'active' : ''}" data-lang="${lang.code}" data-google-code="${lang.googleCode}">
+              ${lang.flag} ${lang.name}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      // 添加样式
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .custom-language-switcher {
+          position: relative;
+          margin-left: 10px;
+          z-index: 1000;
+        }
+        
+        .current-lang {
+          display: flex;
+          align-items: center;
+          justify-content: left;
+          padding: 6px 10px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background 0.3s;
+          min-width: 120px;
+        }
+        
+        .current-lang:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .arrow {
+          margin-left: 5px;
+          font-size: 10px;
+          transition: transform 0.3s;
+        }
+        
+        .lang-options {
+          position: absolute;
+          top: 15%;
+          left: 40%;
+          margin-left: 5px;
+          background: white;
+          border-radius: 4px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+          opacity: 0;
+          visibility: hidden;
+          transform: translateX(-10px);
+          transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+        }
+        
+        .custom-language-switcher:hover .lang-options {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(0);
+        }
+        
+        .custom-language-switcher:hover .arrow {
+          transform: rotate(180deg);
+        }
+        
+        .lang-option {
+          padding: 8px 15px;
+          cursor: pointer;
+          white-space: nowrap;
+          color: #333;
+          transition: background 0.3s;
+        }
+        
+        .lang-option:hover {
+          background: #f5f5f5;
+        }
+        
+        .lang-option.active {
+          background: #eee;
+          font-weight: bold;
+        }
+        
+        /* 暗黑模式适配 */
+        body.dark .current-lang {
+          background: rgba(0, 0, 0, 0.2);
+          color: white;
+        }
+        
+        body.dark .current-lang:hover {
+          background: rgba(0, 0, 0, 0.3);
+        }
+        
+        body.dark .lang-options {
+          background: #333;
+          color: white;
+        }
+        
+        body.dark .lang-option:hover {
+          background: #444;
+        }
+        
+        body.dark .lang-option.active {
+          background: #222;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+          .custom-language-switcher {
+            margin-left: 10px;
+          }
+          
+          .current-lang {
+            min-width: 100px;
+            padding: 5px 8px;
+          }
+          
+          .lang-options {
+            margin-left: 3px;
+          }
+          
+          .lang-option {
+            padding: 6px 12px;
+          }
+        }
+        
+        /* 确保下拉菜单不会超出视口 */
+        .lang-options {
+          max-height: 200px;
+          overflow-y: auto;
+        }
+        
+        /* 当靠近右侧边缘时，向左显示 */
+        .custom-language-switcher.edge-right .lang-options {
+          left: auto;
+          right: 100%;
+          margin-left: 0;
+          margin-right: 5px;
+          transform: translateX(10px);
+        }
+        
+        .custom-language-switcher.edge-right:hover .lang-options {
+          transform: translateX(0);
+        }
+        
+        /* 完全隐藏Google翻译默认的UI */
+        .skiptranslate {
+          display: none !important;
+        }
+        
+        body {
+          top: 0px !important;
+        }
+        
+        .goog-te-gadget {
+          font-size: 0 !important;
+        }
+        
+        #google_translate_element {
+          display: none;
+        }
+        
+        .goog-te-gadget-simple {
+          background-color: transparent !important;
+          border: none !important;
+        }
+        
+        .goog-te-gadget-simple .goog-te-menu-value span {
+          display: none;
+        }
+        
+        .goog-te-gadget-simple .goog-te-menu-value:hover {
+          text-decoration: none;
+        }
+        
+        /* 隐藏Google翻译弹窗 */
+        .goog-te-tooltip {
+          display: none !important;
+        }
+        
+        /* 翻译后的内容样式调整 */
+        .goog-te-highlight {
+          background-color: transparent !important;
+        }
+        
+        /* 隐藏翻译选择器 */
+        .goog-te-gadget .goog-te-combo {
+          display: none !important;
+        }
+        
+        /* 防止代码块被翻译 */
+        figure.highlight.javascript, figure.highlight.javascript * {
+          pointer-events: none !important;
+        }
+        
+        figure.highlight.javascript {
+          position: relative !important;
+        }
+      `;
+      
+      // 添加到页面
+      document.head.appendChild(style);
+      
+      // 添加事件监听器
+      const langOptions = langSwitcher.querySelectorAll('.lang-option');
+      
+      langOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          const selectedLang = this.getAttribute('data-google-code');
+          changeLanguage(selectedLang);
+          
+          // 更新活动状态
+          langOptions.forEach(opt => opt.classList.remove('active'));
+          this.classList.add('active');
+          
+          // 更新当前显示的语言
+          const flag = this.getAttribute('data-flag') || 
+                       languages.find(l => l.googleCode === selectedLang).flag;
+          const name = languages.find(l => l.googleCode === selectedLang).name;
+          langSwitcher.querySelector('.current-lang').innerHTML = `
+            ${flag} ${name}<span class="arrow">▼</span>
+          `;
+        });
+      });
+      
+      return langSwitcher;
+    }
+    
+    // 切换语言
+    function changeLanguage(langCode) {
+      // 如果切换到英语，保护代码块不被翻译
+      if (langCode === 'en') {
+        protectCodeBlocks();
+      }
+      
+      // 设置Google翻译Cookie
+      setCookie('googtrans', '/zh-CN/' + langCode, 365);
+      
+      // 刷新页面以应用翻译
+      window.location.reload();
+    }
+    
+    // 获取Cookie
+    function getCookie(name) {
+      const value = "; " + document.cookie;
+      const parts = value.split("; " + name + "=");
+      if (parts.length == 2) return parts.pop().split(";").shift();
+      return null;
+    }
+    
+    // 设置Cookie
+    function setCookie(name, value, days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "; expires=" + date.toGMTString();
+      document.cookie = name + "=" + value + expires + "; path=/";
+    }
+    
+    // 尝试添加语言切换器到导航栏
+    function addLangSwitcher() {
+      const nav = document.querySelector('.nav') || 
+                 document.querySelector('.menu') || 
+                 document.querySelector('.header') ||
+                 document.querySelector('.site-nav') ||
+                 document.querySelector('.header-inner') ||
+                 document.querySelector('.main-menu');
+      
+      if (nav) {
+        // 创建语言切换器
+        const langSwitcher = createLanguageSwitcher();
+        
+        // 添加到导航栏
+        nav.appendChild(langSwitcher);
+        
+        // 添加边缘检测
+        checkEdgePosition(langSwitcher);
+        
+        // 监听窗口大小变化，重新检查边缘位置
+        window.addEventListener('resize', () => {
+          checkEdgePosition(langSwitcher);
+        });
+      } else {
+        // 如果找不到导航栏，尝试在加载后再次添加
+        setTimeout(addLangSwitcher, 1000);
+      }
+    }
+    
+    // 检查语言切换器是否靠近页面边缘
+    function checkEdgePosition(element) {
+      // 移除之前的边缘类
+      element.classList.remove('edge-right');
+      
+      // 获取元素位置
+      const rect = element.getBoundingClientRect();
+      const optionsWidth = 150; // 估算下拉菜单宽度
+      
+      // 检查是否会超出右侧边缘
+      if (rect.right + optionsWidth > window.innerWidth) {
+        element.classList.add('edge-right');
+      }
+    }
+    
+    // 保护代码块不被翻译
+    function protectCodeBlocks() {
+      // 找到所有带有highlight类的figure元素
+      const codeBlocks = document.querySelectorAll('figure.highlight');
+      
+      // 为每个代码块添加notranslate类
+      codeBlocks.forEach(block => {
+        block.classList.add('notranslate');
+        
+        // 为所有子元素也添加notranslate类
+        const children = block.querySelectorAll('*');
+        children.forEach(child => {
+          child.classList.add('notranslate');
+        });
+      });
+    }
+    
+    // 当DOM加载完成后尝试添加语言切换器
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        addLangSwitcher();
+        protectCodeBlocks();
+      });
+    } else {
+      addLangSwitcher();
+      protectCodeBlocks();
+    }
+    
+    // 等待Google翻译加载完成
+    setTimeout(() => {
+      // 首先保护代码块
+      protectCodeBlocks();
+      
+      // 检查是否有保存的语言偏好
+      const savedLang = getCookie('googtrans');
+      if (savedLang && savedLang !== '/zh-CN/zh-CN') {
+        // 如果有保存的语言偏好且不是中文，则应用翻译
+        const targetLang = savedLang.split('/')[2];
+        if (targetLang && targetLang !== 'zh-CN') {
+          // 触发Google翻译
+          const selectElement = document.querySelector('.goog-te-combo');
+          if (selectElement) {
+            selectElement.value = targetLang;
+            selectElement.dispatchEvent(new Event('change'));
+            
+            // 翻译后再次保护代码块
+            setTimeout(protectCodeBlocks, 1000);
+          }
+        }
+      }
+    }, 2000);
+  })();
+</script>
